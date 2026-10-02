@@ -256,6 +256,32 @@ main {
 .result-card ol { padding-left: 22px; }
 .result-card li { margin-bottom: 8px; }
 
+.video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 15px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 15px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.video-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.video-icon {
+  width: 19px;
+  height: 19px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 .ref-heading {
   font-size: 19px;
   color: var(--accent);
@@ -407,6 +433,12 @@ h3.ref-heading { font-size: 16px; color: var(--text); }
 .icon-maintenance { animation: swing 2s ease-in-out infinite; transform-origin: 70% 70%; }
 .icon-suspension { animation: compress 1.6s ease-in-out infinite; transform-origin: center; }
 .icon-steering { animation: steer 3s ease-in-out infinite; transform-origin: center; }
+.icon-transmission { animation: shift 2.4s ease-in-out infinite; }
+
+@keyframes shift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}
 
 @keyframes compress {
   0%, 100% { transform: scaleY(1); }

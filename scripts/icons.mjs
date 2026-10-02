@@ -25,6 +25,10 @@ export const CATEGORY_ICONS = {
     cls: "icon-suspension",
     svg: '<svg class="cat-icon icon-suspension" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h14M5 21h14"/><path d="M8 3v2l8 3-8 3 8 3-8 3v2"/></svg>',
   },
+  Transmission: {
+    cls: "icon-transmission",
+    svg: '<svg class="cat-icon icon-transmission" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M6 6h12M18 8v4"/><circle cx="18" cy="14" r="2"/></svg>',
+  },
   Steering: {
     cls: "icon-steering",
     svg: '<svg class="cat-icon icon-steering" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V3M9.8 13.2l-5.6 3.3M14.2 13.2l5.6 3.3"/></svg>',

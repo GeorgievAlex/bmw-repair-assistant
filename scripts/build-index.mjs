@@ -173,6 +173,21 @@ function renderSpecTable(entry) {
     .join("")}</table>`;
 }
 
+// Requested by the owner this was built for: he wanted to see someone doing
+// the job on his actual engine before starting. We can't host video, but we
+// can hand off a search already narrowed to his chassis and engine.
+function videoSearchUrl(entry) {
+  const q = `BMW ${entry.chassis} ${entry.engine_code} ${entry.procedure_name}`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+}
+
+function renderVideoLink(entry) {
+  return `<a class="video-link" href="${escapeAttr(videoSearchUrl(entry))}" target="_blank" rel="noopener">
+      <svg class="video-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>
+      Watch someone do this on an ${escapeHtml(entry.chassis)} ${escapeHtml(entry.engine_code)}
+    </a>`;
+}
+
 function renderProcedurePage(entry) {
   const icon = iconFor(entry.category);
 
@@ -190,7 +205,9 @@ function renderProcedurePage(entry) {
         ${renderSpecTable(entry)}
         ${entry.steps ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
         ${entry.notes_warnings ? `<p class="section-title">Notes</p><p class="warning">${escapeHtml(entry.notes_warnings)}</p>` : ""}
-        <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+        <p class="section-title">See it done</p>
+        ${renderVideoLink(entry)}
+        <p class="result-meta" style="margin-top:16px">source: ${escapeHtml(entry.source || "unknown")}</p>
       </div>
     </section>
   `;

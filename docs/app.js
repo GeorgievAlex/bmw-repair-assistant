@@ -8,6 +8,7 @@ const CATEGORY_ICONS = {
   Cooling: '<svg class="cat-icon icon-cooling" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c4 5 7 8.5 7 12a7 7 0 01-14 0c0-3.5 3-7 7-12z"/></svg>',
   Maintenance: '<svg class="cat-icon icon-maintenance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2-2 2.5-2.5z"/></svg>',
   Suspension: '<svg class="cat-icon icon-suspension" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h14M5 21h14"/><path d="M8 3v2l8 3-8 3 8 3-8 3v2"/></svg>',
+  Transmission: '<svg class="cat-icon icon-transmission" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M6 6h12M18 8v4"/><circle cx="18" cy="14" r="2"/></svg>',
   Steering: '<svg class="cat-icon icon-steering" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V3M9.8 13.2l-5.6 3.3M14.2 13.2l5.6 3.3"/></svg>',
   General: '<svg class="cat-icon icon-general" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>',
 };
@@ -172,6 +173,18 @@ function renderReferenceCard(entry) {
   `;
 }
 
+// Requested by the owner: he wanted to see someone doing the job on his
+// actual engine. We can't host video, but we can hand off a pre-narrowed
+// search. Mirrors videoSearchUrl in scripts/build-index.mjs.
+function renderVideoLink(entry) {
+  const q = `BMW ${entry.chassis} ${entry.engine_code} ${entry.procedure_name}`;
+  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+  return `<a class="video-link" href="${escapeAttr(url)}" target="_blank" rel="noopener">
+      <svg class="video-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>
+      Watch someone do this on an ${escapeHtml(entry.chassis)} ${escapeHtml(entry.engine_code)}
+    </a>`;
+}
+
 function renderSpecTable(entry) {
   const rows = [
     ["Torque", entry.torque_specs],
@@ -196,7 +209,9 @@ function renderResultCard(entry) {
       ${renderSpecTable(entry)}
       ${entry.steps ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
       ${entry.notes_warnings ? `<p class="section-title">Notes</p><p class="warning">${escapeHtml(entry.notes_warnings)}</p>` : ""}
-      <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+      <p class="section-title">See it done</p>
+      ${renderVideoLink(entry)}
+      <p class="result-meta" style="margin-top:16px">source: ${escapeHtml(entry.source || "unknown")}</p>
       <a class="back-link" href="procedures/${escapeAttr(entry.slug)}.html" style="margin-top:12px">View full page &rarr;</a>
     </div>
   `;
