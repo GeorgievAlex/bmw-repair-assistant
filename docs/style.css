@@ -149,19 +149,21 @@ main {
   margin-bottom: 20px;
 }
 
-#query {
+.search-box input {
   flex: 1;
+  min-width: 0;
   background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px 16px;
   color: var(--text);
   font-size: 16px;
+  font-family: inherit;
 }
 
-#query:focus { outline: 1px solid var(--accent); }
+.search-box input:focus { outline: 1px solid var(--accent); }
 
-#ask-btn {
+.search-box button {
   background: var(--accent);
   color: #1a1200;
   border: none;
@@ -169,10 +171,11 @@ main {
   padding: 0 22px;
   font-weight: 700;
   font-size: 15px;
+  font-family: inherit;
   cursor: pointer;
 }
 
-#ask-btn:active { transform: scale(0.98); }
+.search-box button:active { transform: scale(0.98); }
 
 .result-card {
   border: 1px solid var(--border);
@@ -398,6 +401,18 @@ main {
 }
 
 .back-link:hover { color: var(--accent); }
+
+.ask-section h2 {
+  font-size: 26px;
+  margin: 0 0 10px;
+}
+
+#ai-answer { margin-bottom: 20px; }
+
+#ai-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
 
 .site-footer {
   border-top: 1px solid var(--border);

@@ -211,4 +211,72 @@ document.getElementById("query").addEventListener("keydown", (e) => {
   if (e.key === "Enter") document.getElementById("ask-btn").click();
 });
 
+// --- Ask (AI) ------------------------------------------------------------
+// Points at the Cloudflare Worker that holds the inference key. The key is
+// never in this file, see worker/README.md.
+const ASK_WORKER_URL = "";
+
+const aiBtn = document.getElementById("ai-btn");
+const aiInput = document.getElementById("ai-query");
+const aiAnswer = document.getElementById("ai-answer");
+
+// Renders the model's reply. Markdown-ish output from a model is untrusted
+// text as far as the DOM is concerned, so it goes through escapeHtml and only
+// paragraph breaks are turned into markup.
+function renderAnswer(text) {
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  aiAnswer.innerHTML = `
+    <div class="result-card">
+      <div class="card-icon-row">${iconFor("General")}<h3 style="margin:0">Answer</h3></div>
+      ${paragraphs.map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`).join("")}
+      <p class="result-meta" style="margin-top:12px">
+        Generated from this site's procedures only, by an open-weight model. Check the linked
+        procedure before turning a wrench, and verify any torque figure or part number yourself.
+      </p>
+    </div>`;
+}
+
+function renderAnswerNotice(message) {
+  aiAnswer.innerHTML = `<p class="no-results">${escapeHtml(message)}</p>`;
+}
+
+async function askQuestion() {
+  const question = aiInput.value.trim();
+  if (!question) return;
+
+  if (!ASK_WORKER_URL) {
+    renderAnswerNotice("Ask isn't wired up yet, the worker URL hasn't been set.");
+    return;
+  }
+
+  aiBtn.disabled = true;
+  renderAnswerNotice("Thinking...");
+
+  try {
+    const res = await fetch(ASK_WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      renderAnswerNotice(data.error || `Request failed (${res.status}).`);
+      return;
+    }
+    renderAnswer(data.answer);
+  } catch {
+    renderAnswerNotice("Couldn't reach the answer service. Check your connection and try again.");
+  } finally {
+    aiBtn.disabled = false;
+  }
+}
+
+aiBtn.addEventListener("click", askQuestion);
+aiInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") askQuestion();
+});
+
 loadIndex();

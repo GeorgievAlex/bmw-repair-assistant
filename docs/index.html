@@ -47,7 +47,7 @@
     </section>
 
     <section class="search-section">
-      <p class="label">// ask something</p>
+      <p class="label">// search the procedures</p>
       <div class="search-box">
         <input
           id="query"
@@ -59,6 +59,28 @@
         <button id="ask-btn">Search</button>
       </div>
       <div id="results"></div>
+    </section>
+
+    <section class="ask-section" id="ask">
+      <p class="label">// ask a question</p>
+      <h2>Describe the problem</h2>
+      <p class="hero-sub">
+        Ask in your own words and get an answer built only from the procedures on this site,
+        running on Gemma, an open-weight model. It will tell you when something isn't covered
+        here rather than inventing a torque figure.
+      </p>
+      <div class="search-box">
+        <input
+          id="ai-query"
+          type="text"
+          inputmode="search"
+          placeholder="e.g. my coolant keeps disappearing but I see no puddle"
+          autocomplete="off"
+          maxlength="500"
+        />
+        <button id="ai-btn">Ask</button>
+      </div>
+      <div id="ai-answer"></div>
     </section>
 
     <section class="browse-section">

@@ -1,0 +1,13 @@
+name = "bmw-repair-assistant-ask"
+main = "src/worker.js"
+compatibility_date = "2026-10-02"
+
+[vars]
+CORPUS_URL = "https://georgievalex.github.io/bmw-repair-assistant/data/index.json"
+ALLOWED_ORIGIN = "https://georgievalex.github.io"
+# Verify this against your own model catalog, or GET https://inference.do-ai.run/v1/models
+# with your key, model ids change as DigitalOcean's catalog moves.
+MODEL = "gemma-4"
+
+# DO_INFERENCE_KEY is a secret, never put it here.
+# Set it with:  npx wrangler secret put DO_INFERENCE_KEY
