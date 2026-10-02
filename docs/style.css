@@ -46,12 +46,21 @@ body {
 }
 
 .nav-menu a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--text-dim);
   text-decoration: none;
   font-size: 14px;
 }
 
 .nav-menu a:hover { color: var(--accent); }
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
 
 .nav-brand {
   display: flex;
@@ -322,8 +331,23 @@ main {
   50% { transform: rotate(10deg); }
 }
 
+.spec-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+  flex-shrink: 0;
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+
+.icon-torque { animation: spin 5s linear infinite; transform-origin: center; }
+.icon-parts { animation: bob 2.2s ease-in-out infinite; }
+.icon-tools { animation: swing 1.8s ease-in-out infinite; transform-origin: 70% 70%; }
+.icon-time { animation: spin 8s linear infinite; transform-origin: center; }
+.icon-difficulty { animation: pulse 1.8s ease-in-out infinite; transform-origin: center; }
+
 @media (prefers-reduced-motion: reduce) {
-  .cat-icon { animation: none !important; }
+  .cat-icon, .spec-icon { animation: none !important; }
 }
 
 .card-icon-row {
