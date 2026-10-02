@@ -310,6 +310,17 @@ main {
 .icon-electrical { animation: flicker 2.5s ease-in-out infinite; }
 .icon-cooling { animation: bob 2.5s ease-in-out infinite; }
 .icon-maintenance { animation: swing 2s ease-in-out infinite; transform-origin: 70% 70%; }
+.icon-suspension { animation: compress 1.6s ease-in-out infinite; transform-origin: center; }
+.icon-steering { animation: steer 3s ease-in-out infinite; transform-origin: center; }
+
+@keyframes compress {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.82); }
+}
+@keyframes steer {
+  0%, 100% { transform: rotate(-18deg); }
+  50% { transform: rotate(18deg); }
+}
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse {
