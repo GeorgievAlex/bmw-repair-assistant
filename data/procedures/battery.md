@@ -1,15 +1,23 @@
 # Battery replacement
 
+## Category
+Electrical
+
 ## Summary
 Replace the 12V battery. The important part most people miss on this generation of BMW isn't the physical swap, it's registering the new battery afterward.
 
 ## Steps
+### Preparation
 1. Note your radio presets and any settings that might reset, some will be retained by the car's memory, some won't.
 2. Locate the battery, on this generation it's commonly in the trunk rather than the engine bay, check under the trunk floor panel or side trim.
-3. Disconnect the negative terminal first, then the positive, remove any retaining clamp.
-4. Remove the old battery, install the new one of the correct type and capacity, reconnect positive first, then negative.
-5. **Register the new battery with the car's electrical system.** This generation uses an Intelligent Battery Sensor (IBS) that tracks battery age and condition to manage charging behavior. If you don't register the replacement, the car keeps charging based on the old battery's profile, which noticeably shortens the life of the new one.
-6. Registration is typically done either through the car's own iDrive/instrument cluster menu on later software versions, or via diagnostic software (commonly used tools in the community include INPA or similar BMW-specific diagnostic software), confirm what your specific car's software version supports before assuming the in-car menu option exists.
+
+### Swap
+1. Disconnect the negative terminal first, then the positive, remove any retaining clamp.
+2. Remove the old battery, install the new one of the correct type and capacity, reconnect positive first, then negative.
+
+### Registration (the step most people skip)
+1. Register the new battery with the car's electrical system. This generation uses an Intelligent Battery Sensor (IBS) that tracks battery age and condition to manage charging behavior. If you don't register the replacement, the car keeps charging based on the old battery's profile, which noticeably shortens the life of the new one.
+2. Registration is typically done either through the car's own iDrive/instrument cluster menu on later software versions, or via diagnostic software (commonly used tools in the community include INPA or similar BMW-specific diagnostic software), confirm what your specific car's software version supports before assuming the in-car menu option exists.
 
 ## Torque Specs
 Battery terminal clamps and tray retaining hardware: typically low torque, hand-tight-plus-a-bit is common guidance, verify against RealOEM or dealer spec if you want an exact number.

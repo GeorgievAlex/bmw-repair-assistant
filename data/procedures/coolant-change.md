@@ -1,16 +1,24 @@
 # Coolant change
 
+## Category
+Cooling
+
 ## Summary
 Drain and replace the engine coolant as routine service, or because the system was opened for other work.
 
 ## Steps
+### Preparation
 1. Let the engine cool completely before opening any part of the cooling system, this is genuinely dangerous hot.
 2. Remove the engine undertray if present.
-3. Open the radiator drain petcock, or disconnect the lower radiator hose, into a drain pan. Loosen the expansion tank cap to help it drain faster.
-4. Close the drain petcock or reconnect the hose once fully drained.
-5. Refill with BMW-spec coolant mixed to the correct ratio, never use a generic universal coolant, the wrong chemistry attacks the plastic components in this cooling system.
-6. Bleed the system: this engine needs air purged properly through the bleed screw on the expansion tank or thermostat housing, or it will run hot and you'll think you have a different problem.
-7. Run the engine to operating temperature with the heater on full blast, this helps push trapped air out. Check for leaks, then top off the level once the car has fully cooled.
+
+### Draining
+1. Open the radiator drain petcock, or disconnect the lower radiator hose, into a drain pan. Loosen the expansion tank cap to help it drain faster.
+2. Close the drain petcock or reconnect the hose once fully drained.
+
+### Refilling and bleeding
+1. Refill with BMW-spec coolant mixed to the correct ratio, never use a generic universal coolant, the wrong chemistry attacks the plastic components in this cooling system.
+2. Bleed the system: this engine needs air purged properly through the bleed screw on the expansion tank or thermostat housing, or it will run hot and you'll think you have a different problem.
+3. Run the engine to operating temperature with the heater on full blast, this helps push trapped air out. Check for leaks, then top off the level once the car has fully cooled.
 
 ## Torque Specs
 Hose clamps and any fasteners disturbed during the drain: verify against RealOEM or dealer spec, these vary by exactly what you're touching.

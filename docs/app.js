@@ -1,3 +1,19 @@
+// Mirrors scripts/icons.mjs. Duplicated here because this is a plain static
+// site with no build/bundle step, pulling in a bundler just to share this
+// small object isn't worth it for a dataset this size.
+const CATEGORY_ICONS = {
+  Engine: '<svg class="cat-icon icon-engine" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+  Brakes: '<svg class="cat-icon icon-brakes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>',
+  Electrical: '<svg class="cat-icon icon-electrical" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>',
+  Cooling: '<svg class="cat-icon icon-cooling" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c4 5 7 8.5 7 12a7 7 0 01-14 0c0-3.5 3-7 7-12z"/></svg>',
+  Maintenance: '<svg class="cat-icon icon-maintenance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2-2 2.5-2.5z"/></svg>',
+  General: '<svg class="cat-icon icon-general" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>',
+};
+
+function iconFor(category) {
+  return CATEGORY_ICONS[category] || CATEGORY_ICONS.General;
+}
+
 let entries = [];
 
 async function loadIndex() {
@@ -39,13 +55,13 @@ function renderNumberedList(text) {
 
 function renderSteps(stepsText) {
   if (!stepsText) return "";
-  // Some procedures split steps into labeled sub-groups with "### Label" headers
-  // (e.g. two unrelated filters done in one job). Render each group separately.
+  // Procedures break their steps into named stages with "### Stage" headers
+  // (prep, removal, installation, etc, or unrelated sub-jobs done together).
   if (stepsText.includes("### ")) {
     const parts = stepsText.split(/^###\s+(.+)$/m);
     let html = "";
     for (let i = 1; i < parts.length; i += 2) {
-      html += `<p class="section-title">${escapeHtml(parts[i].trim())}</p>${renderNumberedList(parts[i + 1] || "")}`;
+      html += `<p class="stage-title">${escapeHtml(parts[i].trim())}</p>${renderNumberedList(parts[i + 1] || "")}`;
     }
     return html;
   }
@@ -76,13 +92,14 @@ function escapeAttr(str) {
 // never over already-built HTML, and image attributes get attribute-safe
 // escaping rather than the text-node escaping used elsewhere on this page.
 function renderMarkdownLine(line) {
-  const imgRegex = /!\[([^\]]*)\]\(([^)\s]+)\)/g;
+  // (!)? distinguishes an image (![alt](src)) from a plain link ([text](url)).
+  const linkRegex = /(!)?\[([^\]]*)\]\(([^)\s]+)\)/g;
   const parts = [];
   let lastIndex = 0;
   let m;
-  while ((m = imgRegex.exec(line)) !== null) {
+  while ((m = linkRegex.exec(line)) !== null) {
     if (m.index > lastIndex) parts.push({ type: "text", value: line.slice(lastIndex, m.index) });
-    parts.push({ type: "image", alt: m[1], src: m[2] });
+    parts.push({ type: m[1] ? "image" : "link", label: m[2], target: m[3] });
     lastIndex = m.index + m[0].length;
   }
   if (lastIndex < line.length) parts.push({ type: "text", value: line.slice(lastIndex) });
@@ -90,8 +107,12 @@ function renderMarkdownLine(line) {
   return parts
     .map((p) => {
       if (p.type === "image") {
-        const safeSrc = /^(https?:|\.\.?\/|[\w-]+\/)/.test(p.src) ? p.src : "#";
-        return `<img src="${escapeAttr(safeSrc)}" alt="${escapeAttr(p.alt)}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
+        const safeSrc = /^(https?:|\.\.?\/|[\w-]+\/)/.test(p.target) ? p.target : "#";
+        return `<img src="${escapeAttr(safeSrc)}" alt="${escapeAttr(p.label)}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
+      }
+      if (p.type === "link") {
+        const safeHref = /^https?:/.test(p.target) ? p.target : "#";
+        return `<a href="${escapeAttr(safeHref)}" target="_blank" rel="noopener">${escapeHtml(p.label)}</a>`;
       }
       return escapeHtml(p.value).replace(/\*([^*]+)\*/g, "<em>$1</em>");
     })
@@ -105,40 +126,41 @@ function renderReferenceCard(entry) {
     .filter(Boolean);
   return `
     <div class="result-card">
-      <h3>${escapeHtml(entry.procedure_name)}</h3>
+      <div class="card-icon-row">${iconFor(entry.category)}<h3 style="margin:0">${escapeHtml(entry.procedure_name)}</h3></div>
       <div class="result-meta">${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)} · ${escapeHtml(entry.category)}</div>
       ${paragraphs.map((p) => `<p>${renderMarkdownLine(p)}</p>`).join("")}
       <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+      <a class="back-link" href="procedures/${escapeAttr(entry.slug)}.html" style="margin-top:12px">View full page &rarr;</a>
     </div>
   `;
 }
 
+function renderSpecTable(entry) {
+  const rows = [
+    ["Torque", entry.torque_specs],
+    ["Parts", entry.part_numbers],
+    ["Tools", entry.tools_needed],
+    ["Time", entry.time_estimate],
+    ["Difficulty", entry.difficulty],
+  ].filter(([, v]) => v);
+  if (!rows.length) return "";
+  return `<table class="spec-table">${rows
+    .map(([label, value]) => `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`)
+    .join("")}</table>`;
+}
+
 function renderResultCard(entry) {
   if (entry.type === "reference") return renderReferenceCard(entry);
-  const chips = [];
-  if (entry.torque_specs) {
-    chips.push(`<span class="spec-chip">torque: ${escapeHtml(entry.torque_specs)}</span>`);
-  }
-  if (entry.part_numbers) {
-    chips.push(`<span class="spec-chip">parts: ${escapeHtml(entry.part_numbers)}</span>`);
-  }
-  if (entry.time_estimate) {
-    chips.push(`<span class="spec-chip">time: ${escapeHtml(entry.time_estimate)}</span>`);
-  }
-  if (entry.difficulty) {
-    chips.push(`<span class="spec-chip">difficulty: ${escapeHtml(entry.difficulty)}</span>`);
-  }
-
   return `
     <div class="result-card">
-      <h3>${escapeHtml(entry.procedure_name)}</h3>
+      <div class="card-icon-row">${iconFor(entry.category)}<h3 style="margin:0">${escapeHtml(entry.procedure_name)}</h3></div>
       <div class="result-meta">${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)} · ${escapeHtml(entry.category)}</div>
       <p>${escapeHtml(entry.summary)}</p>
-      ${chips.length ? `<div class="spec-row">${chips.join("")}</div>` : ""}
+      ${renderSpecTable(entry)}
       ${entry.steps ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
-      ${entry.tools_needed ? `<p class="section-title">Tools</p><p>${escapeHtml(entry.tools_needed)}</p>` : ""}
       ${entry.notes_warnings ? `<p class="section-title">Notes</p><p class="warning">${escapeHtml(entry.notes_warnings)}</p>` : ""}
       <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+      <a class="back-link" href="procedures/${escapeAttr(entry.slug)}.html" style="margin-top:12px">View full page &rarr;</a>
     </div>
   `;
 }
@@ -156,22 +178,13 @@ function renderCategoryGrid() {
   const grid = document.getElementById("category-grid");
   grid.innerHTML = entries
     .map(
-      (e, i) => `
-      <div class="grid-card" data-id="${e.id}">
-        <h4>${escapeHtml(e.procedure_name)}</h4>
+      (e) => `
+      <a class="grid-card" href="procedures/${escapeAttr(e.slug)}.html">
+        <div class="card-icon-row">${iconFor(e.category)}<h4 style="margin:0">${escapeHtml(e.procedure_name)}</h4></div>
         <p>${escapeHtml(e.category)}</p>
-      </div>`
+      </a>`
     )
     .join("");
-
-  grid.querySelectorAll(".grid-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = Number(card.dataset.id);
-      const entry = entries.find((e) => e.id === id);
-      renderResults([entry]);
-      document.getElementById("results").scrollIntoView({ behavior: "smooth" });
-    });
-  });
 }
 
 document.getElementById("ask-btn").addEventListener("click", () => {

@@ -1,5 +1,8 @@
 # Cabin and engine air filter change
 
+## Category
+Maintenance
+
 ## Summary
 Replace the cabin (pollen) filter and the engine intake air filter, two separate, unrelated filters often done together since both are quick.
 

@@ -1,14 +1,19 @@
 #!/usr/bin/env node
-// Reads every Markdown file in data/, turns each into a search entry, writes docs/data/index.json.
-// No dependencies on purpose, the dataset is small enough that hand-rolled parsing is fine.
+// Reads every Markdown file in data/, writes docs/data/index.json, and generates
+// one static page per entry under docs/procedures/<slug>.html.
+// No dependencies on purpose, the dataset is small enough that hand-rolled
+// parsing and templating are fine.
 
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { iconFor } from "./icons.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "data");
-const outPath = join(__dirname, "..", "docs", "data", "index.json");
+const docsDir = join(__dirname, "..", "docs");
+const outPath = join(docsDir, "data", "index.json");
+const pagesDir = join(docsDir, "procedures");
 
 function listMd(dir) {
   try {
@@ -18,7 +23,12 @@ function listMd(dir) {
   }
 }
 
-// Plain reference docs: a leading "# Title" then prose. No "## " sections expected.
+function slugify(filename) {
+  return filename.replace(/\.md$/, "");
+}
+
+// --- Markdown parsing -------------------------------------------------
+
 function parseReferenceMd(text) {
   const lines = text.trim().split("\n");
   const titleLine = lines.find((l) => l.startsWith("# ")) || lines[0] || "";
@@ -27,7 +37,6 @@ function parseReferenceMd(text) {
   return { title, body };
 }
 
-// Structured procedure docs: "# Title" then "## Section" blocks.
 function parseProcedureMd(text) {
   const titleMatch = text.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : "Untitled procedure";
@@ -44,15 +53,184 @@ function parseProcedureMd(text) {
   return { title, sections };
 }
 
+// --- HTML rendering (server-side, same safety rules as docs/app.js) ---
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+// pathPrefix: generated pages live one level deeper than the source data
+// (docs/procedures/*.html vs docs/*.md-derived paths), so a plain relative
+// image path like "images/x.jpg" needs "../" prepended to resolve correctly.
+function renderMarkdownLine(line, pathPrefix = "") {
+  // (!)? distinguishes an image (![alt](src)) from a plain link ([text](url)).
+  const linkRegex = /(!)?\[([^\]]*)\]\(([^)\s]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let m;
+  while ((m = linkRegex.exec(line)) !== null) {
+    if (m.index > lastIndex) parts.push({ type: "text", value: line.slice(lastIndex, m.index) });
+    parts.push({ type: m[1] ? "image" : "link", label: m[2], target: m[3] });
+    lastIndex = m.index + m[0].length;
+  }
+  if (lastIndex < line.length) parts.push({ type: "text", value: line.slice(lastIndex) });
+
+  return parts
+    .map((p) => {
+      if (p.type === "image") {
+        const isRelative = /^[\w-]+\//.test(p.target);
+        const isSafe = /^(https?:|\.\.?\/|[\w-]+\/)/.test(p.target);
+        const safeSrc = !isSafe ? "#" : isRelative ? pathPrefix + p.target : p.target;
+        return `<img src="${escapeAttr(safeSrc)}" alt="${escapeAttr(p.label)}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
+      }
+      if (p.type === "link") {
+        const safeHref = /^https?:/.test(p.target) ? p.target : "#";
+        return `<a href="${escapeAttr(safeHref)}" target="_blank" rel="noopener">${escapeHtml(p.label)}</a>`;
+      }
+      return escapeHtml(p.value).replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    })
+    .join("");
+}
+
+function renderNumberedList(text) {
+  const steps = text.split(/\d+\.\s/).map((s) => s.trim()).filter(Boolean);
+  if (steps.length < 2) return `<p>${escapeHtml(text)}</p>`;
+  return `<ol>${steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>`;
+}
+
+function renderSteps(stepsText) {
+  if (!stepsText) return "";
+  if (stepsText.includes("### ")) {
+    const parts = stepsText.split(/^###\s+(.+)$/m);
+    let html = "";
+    for (let i = 1; i < parts.length; i += 2) {
+      html += `<p class="stage-title">${escapeHtml(parts[i].trim())}</p>${renderNumberedList(parts[i + 1] || "")}`;
+    }
+    return html;
+  }
+  return renderNumberedList(stepsText);
+}
+
+function pageShell({ title, description, bodyHtml }) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+  <title>${escapeHtml(title)} — BMW Repair Workshop</title>
+  <meta name="description" content="${escapeAttr(description)}" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-left">
+      <div class="nav-brand">
+        <span class="brand-mark">◉</span>
+        <span>BMW Repair Workshop</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#category-grid">Browse</a></li>
+        <li><a href="https://github.com/GeorgievAlex/bmw-repair-assistant" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+    <div class="nav-sub">E90 325i · N52B25</div>
+  </header>
+  <main>
+    ${bodyHtml}
+    <a class="back-link" href="../index.html">&larr; back to all procedures</a>
+  </main>
+  <footer class="site-footer">
+    <p>Built for Hacktoberfest's "Build for a Friend" weekend challenge. Data written for this
+    project from general knowledge or sourced directly from an owner's own experience, not
+    scraped from any manual.</p>
+  </footer>
+</body>
+</html>
+`;
+}
+
+function renderSpecTable(entry) {
+  const rows = [
+    ["Torque", entry.torque_specs],
+    ["Parts", entry.part_numbers],
+    ["Tools", entry.tools_needed],
+    ["Time", entry.time_estimate],
+    ["Difficulty", entry.difficulty],
+  ].filter(([, v]) => v);
+  if (!rows.length) return "";
+  return `<table class="spec-table">${rows
+    .map(([label, value]) => `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`)
+    .join("")}</table>`;
+}
+
+function renderProcedurePage(entry) {
+  const icon = iconFor(entry.category);
+
+  const body = `
+    <section class="procedure-banner">
+      ${icon.svg}
+      <div>
+        <p class="cat-label">${escapeHtml(entry.category)} · ${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)}</p>
+        <h1 style="margin:4px 0 0">${escapeHtml(entry.procedure_name)}</h1>
+      </div>
+    </section>
+    <section style="padding: 24px 20px; max-width: 880px; margin: 0 auto;">
+      <p>${escapeHtml(entry.summary)}</p>
+      <div class="result-card">
+        ${renderSpecTable(entry)}
+        ${entry.steps ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
+        ${entry.notes_warnings ? `<p class="section-title">Notes</p><p class="warning">${escapeHtml(entry.notes_warnings)}</p>` : ""}
+        <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+      </div>
+    </section>
+  `;
+  return pageShell({ title: entry.procedure_name, description: entry.summary, bodyHtml: body });
+}
+
+function renderReferencePage(entry) {
+  const icon = iconFor(entry.category);
+  const paragraphs = entry.body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const body = `
+    <section class="procedure-banner">
+      ${icon.svg}
+      <div>
+        <p class="cat-label">${escapeHtml(entry.category)} · ${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)}</p>
+        <h1 style="margin:4px 0 0">${escapeHtml(entry.procedure_name)}</h1>
+      </div>
+    </section>
+    <section style="padding: 24px 20px; max-width: 880px; margin: 0 auto;">
+      <div class="result-card">
+        ${paragraphs.map((p) => `<p>${renderMarkdownLine(p, "../")}</p>`).join("")}
+        <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
+      </div>
+    </section>
+  `;
+  return pageShell({ title: entry.procedure_name, description: entry.procedure_name, bodyHtml: body });
+}
+
+// --- Build ---------------------------------------------------------------
+
 let entries = [];
 let id = 0;
+mkdirSync(pagesDir, { recursive: true });
 
 for (const file of listMd(join(dataDir, "general"))) {
   const text = readFileSync(join(dataDir, "general", file), "utf8");
   const { title, body } = parseReferenceMd(text);
-  entries.push({
+  const slug = slugify(file);
+  const entry = {
     id: id++,
     type: "reference",
+    slug,
     source_file: `general/${file}`,
     procedure_name: title,
     chassis: "E90",
@@ -60,18 +238,22 @@ for (const file of listMd(join(dataDir, "general"))) {
     category: "General",
     body,
     source: "written for this project, not extracted from any manual",
-    search_text: `${title} ${body}`.toLowerCase(),
-  });
+  };
+  entry.search_text = `${title} ${body}`.toLowerCase();
+  entries.push(entry);
+  writeFileSync(join(pagesDir, `${slug}.html`), renderReferencePage(entry));
 }
 
 for (const file of listMd(join(dataDir, "procedures"))) {
   const text = readFileSync(join(dataDir, "procedures", file), "utf8");
   const { title, sections } = parseProcedureMd(text);
   const get = (k) => sections[k] || "";
+  const slug = slugify(file);
 
   const entry = {
     id: id++,
     type: "procedure",
+    slug,
     source_file: `procedures/${file}`,
     procedure_name: title,
     chassis: "E90",
@@ -92,7 +274,9 @@ for (const file of listMd(join(dataDir, "procedures"))) {
     .join(" ")
     .toLowerCase();
   entries.push(entry);
+  writeFileSync(join(pagesDir, `${slug}.html`), renderProcedurePage(entry));
 }
 
 writeFileSync(outPath, JSON.stringify({ built_at: new Date().toISOString(), entries }, null, 2));
 console.log(`Wrote ${entries.length} entries to ${outPath}`);
+console.log(`Generated ${entries.length} pages in ${pagesDir}`);

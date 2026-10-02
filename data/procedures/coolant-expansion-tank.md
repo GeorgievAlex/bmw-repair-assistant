@@ -1,18 +1,26 @@
 # Coolant expansion tank replacement
 
+## Category
+Cooling
+
 ## Summary
 Replace the plastic coolant expansion tank, a known weak point on this engine family, it cracks over time from repeated heat and pressure cycling, usually showing up as a slow coolant loss with no visible puddle.
 
 ## Steps
+### Preparation
 1. Let the engine cool completely before opening any part of the cooling system.
 2. Relieve system pressure by slowly loosening the expansion tank cap.
 3. Drain coolant down below the level of the tank, you don't need to fully drain the whole system for this job, just enough that coolant isn't pouring out when the tank is disconnected.
-4. Disconnect the hoses from the tank, note which hose goes where, they're not always obviously different.
-5. Disconnect the low coolant level sensor connector if your tank has one built in.
-6. Remove the tank's mounting bolts or clips, lift it out.
-7. Transfer the level sensor to the new tank if it's a separate part, or confirm the new tank includes one if that's how your car is equipped.
-8. Install the new tank, reconnect hoses and the sensor, refill coolant to spec.
-9. Bleed the system per the standard coolant bleed procedure, trapped air here causes the same overheating symptoms as a full coolant change done without bleeding.
+
+### Removal
+1. Disconnect the hoses from the tank, note which hose goes where, they're not always obviously different.
+2. Disconnect the low coolant level sensor connector if your tank has one built in.
+3. Remove the tank's mounting bolts or clips, lift it out.
+
+### Installation and bleeding
+1. Transfer the level sensor to the new tank if it's a separate part, or confirm the new tank includes one if that's how your car is equipped.
+2. Install the new tank, reconnect hoses and the sensor, refill coolant to spec.
+3. Bleed the system per the standard coolant bleed procedure, trapped air here causes the same overheating symptoms as a full coolant change done without bleeding.
 
 ## Torque Specs
 Mounting bolts and hose clamps: low torque, hand-tight-plus-a-quarter-turn is common guidance for the clamps, verify against RealOEM or dealer spec for the mounting hardware.

@@ -1,17 +1,25 @@
 # Alternator replacement
 
+## Category
+Electrical
+
 ## Summary
 Replace a failed or failing alternator.
 
 ## Steps
+### Preparation
 1. Disconnect the battery negative terminal first, this is a live electrical component.
 2. Remove the serpentine belt (see the serpentine belt procedure).
-3. Disconnect the electrical connector and the B+ terminal nut from the alternator, note the orientation before you pull anything off.
-4. Remove the alternator mounting bolts, these are typically one-time-use torque-to-yield bolts on this engine, buy new ones before you start, don't plan to reuse the old ones.
-5. Maneuver the alternator out, it can be a tight fit depending on what else is routed through the engine bay on your specific car.
-6. Install the new or rebuilt alternator in reverse order, using new mounting bolts, torque them to spec in the correct stages.
-7. Torque the B+ terminal nut to spec, reinstall the belt, reconnect the battery.
-8. Start the engine and verify charging voltage is correct before considering the job done.
+
+### Removal
+1. Disconnect the electrical connector and the B+ terminal nut from the alternator, note the orientation before you pull anything off.
+2. Remove the alternator mounting bolts, these are typically one-time-use torque-to-yield bolts on this engine, buy new ones before you start, don't plan to reuse the old ones.
+3. Maneuver the alternator out, it can be a tight fit depending on what else is routed through the engine bay on your specific car.
+
+### Installation
+1. Install the new or rebuilt alternator in reverse order, using new mounting bolts, torque them to spec in the correct stages.
+2. Torque the B+ terminal nut to spec, reinstall the belt, reconnect the battery.
+3. Start the engine and verify charging voltage is correct before considering the job done.
 
 ## Torque Specs
 Alternator mounting bolts: commonly cited as 10 Nm plus an additional 180 degree turn, consistent with a torque-to-yield, one-time-use aluminum bolt design, do not reuse these bolts. B+ terminal nut: verify against RealOEM or dealer spec. Confirm both against your exact year before relying on these numbers.
