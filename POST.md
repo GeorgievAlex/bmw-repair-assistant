@@ -1,7 +1,8 @@
 ---
 title: "I couldn't legally use the repair manual, so I built my friend something better"
-published: false
+published: true
 tags: devchallenge, weekendchallenge, hf26challenge, ai
+ai_disclosure_level: ai_assisted
 ---
 
 *This is a submission for the [Hacktoberfest Weekend Challenge: Build for a Friend](https://dev.to/challenges/hacktoberfest-weekend-2026-10-01)*
@@ -50,7 +51,11 @@ Try the Ask box with something vague, the way you'd actually say it:
 
 ## How I Built It
 
-**Open-source AI at the core:** [Gemma](https://deepmind.google/models/gemma/) (`gemma-4-31B-it`), an open-weight model, served through DigitalOcean Serverless Inference.
+**Open-source AI at the core:** [Gemma](https://deepmind.google/models/gemma/) (`gemma-4-31B-it`), Google's open-weight model, served through **DigitalOcean Serverless Inference**.
+
+DigitalOcean is doing the actual model serving here. I send an OpenAI-compatible chat completion to `inference.do-ai.run/v1/chat/completions`, authenticated with a DigitalOcean model access key, and Gemma runs on their infrastructure. No GPU to provision, no model to host, no container to keep warm. The spend ceiling is their prepaid Inference & Agents balance with auto-reload off, which means the absolute worst case for a runaway is a capped loss and the Ask box going quiet, rather than a surprise bill.
+
+That combination, an open-weight model served by a provider I'm not locked into, is most of the "open innovation" argument below in one line.
 
 **Architecture, deliberately boring:**
 
@@ -173,6 +178,13 @@ Correct on both counts. And I think that joke is a decent summary of where this 
 
 ## Prize Categories
 
-**Best Use of DigitalOcean** — Serverless Inference runs the Gemma model behind the Ask feature.
+**Best Use of DigitalOcean** — DigitalOcean Serverless Inference serves the open-weight model behind the Ask feature, via `inference.do-ai.run`, with spend capped by the prepaid Inference & Agents balance.
 
-**Best Use of Gemma** — `gemma-4-31B-it` is the open-weight model doing the reasoning, constrained to the site's own content.
+**Best Use of Gemma** — `gemma-4-31B-it` is the open-weight model doing the reasoning, constrained to the site's own content and instructed to refuse rather than invent.
+
+## Credits
+
+The project has no dependencies, the code is all hand-written, and the content was written for this project rather than taken from anywhere. Two things worth naming anyway:
+
+- The GitHub mark in the site navigation is GitHub's logo, used only to link to the repository.
+- The post and the project were built with AI assistance, declared in the front matter. The specs in the site came from general knowledge, and every one of them says on the page that you should verify it yourself.
