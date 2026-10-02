@@ -165,6 +165,12 @@ All of this is live on the site now, shipped between his message and this post g
 
 That last row is the one I'd have got wrong on my own. The feature I was about to build is the feature he actively didn't want, and I'd never have found that out by thinking harder about it.
 
+He had one more request, which I'm not going to be able to ship:
+
+> "it will be good if the site can handle those repairs and changes for myself but AI is not there yet :D"
+
+Correct on both counts. And I think that joke is a decent summary of where this sits. The useful version of AI here isn't the one that does the job. It's the one that tells him the caliper guide bolts are 30 Nm, points at the procedure it got that from, reminds him to check it, and then gets out of the way while he does the work he already knows how to do.
+
 ## Prize Categories
 
 **Best Use of DigitalOcean** — Serverless Inference runs the Gemma model behind the Ask feature.
