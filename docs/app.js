@@ -58,19 +58,44 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// escapeHtml() above is for *text node* content (via textContent), which does
+// not escape quote characters, those only matter inside attribute values. Use
+// this one specifically when building an attribute, e.g. alt="...", src="...".
+function escapeAttr(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Minimal, safe markdown line renderer: handles our own authored content only
-// (images and italic emphasis). Everything is escaped first, so this never
-// introduces raw HTML, it only re-enables a couple of specific safe patterns.
+// (images and italic emphasis). Splits into image matches and plain-text
+// segments first, so italic handling only ever runs over escaped plain text,
+// never over already-built HTML, and image attributes get attribute-safe
+// escaping rather than the text-node escaping used elsewhere on this page.
 function renderMarkdownLine(line) {
-  const escaped = escapeHtml(line);
-  const withImages = escaped.replace(
-    /!\[([^\]]*)\]\(([^)\s]+)\)/g,
-    (_, alt, src) => {
-      const safeSrc = /^(https?:|\.\.?\/|[\w-]+\/)/.test(src) ? src : "#";
-      return `<img src="${safeSrc}" alt="${alt}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
-    }
-  );
-  return withImages.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  const imgRegex = /!\[([^\]]*)\]\(([^)\s]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let m;
+  while ((m = imgRegex.exec(line)) !== null) {
+    if (m.index > lastIndex) parts.push({ type: "text", value: line.slice(lastIndex, m.index) });
+    parts.push({ type: "image", alt: m[1], src: m[2] });
+    lastIndex = m.index + m[0].length;
+  }
+  if (lastIndex < line.length) parts.push({ type: "text", value: line.slice(lastIndex) });
+
+  return parts
+    .map((p) => {
+      if (p.type === "image") {
+        const safeSrc = /^(https?:|\.\.?\/|[\w-]+\/)/.test(p.src) ? p.src : "#";
+        return `<img src="${escapeAttr(safeSrc)}" alt="${escapeAttr(p.alt)}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
+      }
+      return escapeHtml(p.value).replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    })
+    .join("");
 }
 
 function renderReferenceCard(entry) {
