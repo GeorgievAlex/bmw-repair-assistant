@@ -12,7 +12,7 @@ My friend repairs his own BMW E90 325i. Not professionally, not as a hobby exact
 
 Watching him work, the actual bottleneck is never the wrench. It's that the information is scattered. A torque spec lives in a forum post from 2013. A part number lives in a different tab. Half the "guides" are a video where someone talks for four minutes before touching the car. He's lying under a car on jack stands with dirty hands trying to pinch-zoom a phone screen.
 
-So I built him **[BMW Repair Workshop](https://georgievalex.github.io/bmw-repair-assistant/)**: a fast, mobile-first reference for his exact car. Nineteen repair procedures, seven reference guides, every torque value and part number laid out in a table instead of buried in prose. And an Ask box where he can describe a problem in his own words and get an answer built only from those procedures.
+So I built him **[BMW Repair Workshop](https://georgievalex.github.io/bmw-repair-assistant/)**: a fast, mobile-first reference for his exact car. Twenty repair procedures, seven reference guides, every torque value and part number laid out in a table instead of buried in prose. And an Ask box where he can describe a problem in his own words and get an answer built only from those procedures.
 
 The interesting part isn't the site. It's what I wasn't allowed to build.
 
@@ -68,7 +68,7 @@ The site is 100% static. Content lives as Markdown in the repo, a dependency-fre
 
 I started to build one, then measured the corpus. The entire knowledge base is about 11,000 tokens. That fits in a single prompt with room to spare.
 
-So every question sends *all twenty-six entries* to the model. No embeddings, no vector store, no chunking, no retrieval step that can silently fetch the wrong chunk and answer confidently from it. The model sees the complete corpus every time.
+So every question sends *all twenty-seven entries* to the model. No embeddings, no vector store, no chunking, no retrieval step that can silently fetch the wrong chunk and answer confidently from it. The model sees the complete corpus every time.
 
 This is faster to build, free of an entire category of bug, *and* more accurate than chunked retrieval at this scale. Costs about $0.002 per question. The reflex to reach for a vector database is strong, and measuring first saved me from it.
 
@@ -90,7 +90,7 @@ Four reasons, in increasing order of how much I actually believe them.
 
 **Model choice is a swap, not a migration.** Gemma is one line of config. If something better ships, or Gemma gets cheaper elsewhere, I change a string. Nothing else in the project knows or cares which model answers.
 
-**It's inspectable.** When the model does something strange, I can read the entire input that produced it: 24 Markdown files in a public repo and a system prompt in a 180-line worker. No hidden retrieval step deciding what the model sees. For something that tells people how tight to torque a brake caliper, I want to be able to explain any answer it gives.
+**It's inspectable.** When the model does something strange, I can read the entire input that produced it: 27 Markdown files in a public repo and a system prompt in a 160-line worker. No hidden retrieval step deciding what the model sees. For something that tells people how tight to torque a brake caliper, I want to be able to explain any answer it gives.
 
 **And the one that actually drove the project:** the open approach was the only one I could build honestly.
 
@@ -151,6 +151,19 @@ The line I didn't expect:
 > "You're my go to AI guy and also good mechanic yourself so I would love if you can work on this in the future so me, you and other petrol heads can use it"
 
 I'm not a good mechanic. I just wrote down what I could verify and was careful about what I couldn't. But "so me, you and other petrol heads can use it" is a better description of why this is worth continuing than anything in my own notes.
+
+### What his feedback actually changed
+
+All of this is live on the site now, shipped between his message and this post going up:
+
+| He said | What changed |
+|---|---|
+| Wanted to find video of the job on *his* engine, assumed impossible | Every procedure has a "See it done" link, a search pre-narrowed to `BMW E90 N52B25 <job>` |
+| Asked for an exhaust procedure | Added, full job |
+| Asked to "dissamble the gearbox" | Added fluid and pan service; internal rebuild explicitly declined as a specialist bench job |
+| Prefers text over voice, with reasons | Voice input dropped from the roadmap entirely |
+
+That last row is the one I'd have got wrong on my own. The feature I was about to build is the feature he actively didn't want, and I'd never have found that out by thinking harder about it.
 
 ## Prize Categories
 
