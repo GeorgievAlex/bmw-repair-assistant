@@ -22,8 +22,13 @@ npx wrangler secret put DO_INFERENCE_KEY   # paste your model access key when pr
 npx wrangler deploy
 ```
 
-`wrangler secret put` prompts for the value and stores it encrypted with
-Cloudflare. It never gets written to this repo.
+`wrangler secret put` takes the secret's **name** as its argument and prompts
+separately for the value. Pass `DO_INFERENCE_KEY`, not the key itself, it's an
+easy slip and it fails confusingly: the worker returns a 500 saying the secret
+is missing, because the key got stored under the wrong name. Check with
+`npx wrangler secret list`, the name column should read `DO_INFERENCE_KEY`.
+
+The value is stored encrypted with Cloudflare and never written to this repo.
 
 Get a model access key from the DigitalOcean Control Panel under Inference →
 model access keys. Scope it to just the model you're using.

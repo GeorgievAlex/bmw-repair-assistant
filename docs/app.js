@@ -214,7 +214,7 @@ document.getElementById("query").addEventListener("keydown", (e) => {
 // --- Ask (AI) ------------------------------------------------------------
 // Points at the Cloudflare Worker that holds the inference key. The key is
 // never in this file, see worker/README.md.
-const ASK_WORKER_URL = "";
+const ASK_WORKER_URL = "https://bmw-repair-assistant-ask.bmwrepairworkshop.workers.dev";
 
 const aiBtn = document.getElementById("ai-btn");
 const aiInput = document.getElementById("ai-query");
