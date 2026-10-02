@@ -29,12 +29,14 @@ Battery: confirm the correct capacity (Ah) and type (standard vs AGM) for your c
 Basic wrench set for the terminals, a battery registration tool or access to the car's menu system, a memory-saver device if you want to avoid losing radio/seat memory settings during the swap.
 
 ## Difficulty
-Easy (physical swap) to Medium (if registration requires diagnostic software you don't already have access to)
+Easy to Medium
 
 ## Time Estimate
 20-30 minutes for the physical swap, variable for registration depending on your tools
 
 ## Notes
+The physical swap is genuinely easy, it's the registration that decides how involved this job is: trivial if your car's software exposes it in the menus, more of a project if it needs diagnostic software you don't already have.
+
 This is the step people skip and then wonder why their "new battery" is dead in eight months. If your battery lives in the trunk, also check that the battery vent tube (if equipped) is properly connected, venting matters for AGM batteries in an enclosed space. Disconnecting the battery on this generation can also trigger window/sunroof initialization issues afterward, worth knowing that one-touch window operation sometimes needs to be re-learned per window after a battery disconnect.
 
 ## Source

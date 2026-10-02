@@ -35,6 +35,8 @@ async function loadIndex() {
   const res = await fetch("data/index.json");
   const data = await res.json();
   entries = data.entries;
+  renderStats();
+  renderFilters();
   renderCategoryGrid();
 }
 
@@ -134,16 +136,36 @@ function renderMarkdownLine(line) {
     .join("");
 }
 
-function renderReferenceCard(entry) {
-  const paragraphs = entry.body
+// Reference docs are prose with "## Section" headings and "- " bullet lists.
+// Mirrors renderReferenceBody in scripts/build-index.mjs.
+function renderReferenceBody(body) {
+  return body
     .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+    .map((b) => b.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const heading = block.match(/^(#{2,3})\s+(.+)$/);
+      if (heading && !block.includes("\n")) {
+        const tag = heading[1].length === 2 ? "h2" : "h3";
+        return `<${tag} class="ref-heading">${escapeHtml(heading[2].trim())}</${tag}>`;
+      }
+      const lines = block.split("\n").map((l) => l.trim());
+      if (lines.every((l) => l.startsWith("- "))) {
+        return `<ul class="ref-list">${lines
+          .map((l) => `<li>${renderMarkdownLine(l.slice(2))}</li>`)
+          .join("")}</ul>`;
+      }
+      return `<p>${renderMarkdownLine(block)}</p>`;
+    })
+    .join("");
+}
+
+function renderReferenceCard(entry) {
   return `
     <div class="result-card">
       <div class="card-icon-row">${iconFor(entry.category)}<h3 style="margin:0">${escapeHtml(entry.procedure_name)}</h3></div>
       <div class="result-meta">${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)} · ${escapeHtml(entry.category)}</div>
-      ${paragraphs.map((p) => `<p>${renderMarkdownLine(p)}</p>`).join("")}
+      ${renderReferenceBody(entry.body)}
       <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
       <a class="back-link" href="procedures/${escapeAttr(entry.slug)}.html" style="margin-top:12px">View full page &rarr;</a>
     </div>
@@ -189,16 +211,67 @@ function renderResults(list) {
   el.innerHTML = list.map(renderResultCard).join("");
 }
 
+let activeCategory = "All";
+
+function difficultyClass(difficulty) {
+  const d = (difficulty || "").toLowerCase();
+  if (d.startsWith("easy")) return "diff-easy";
+  if (d.startsWith("hard")) return "diff-hard";
+  if (d.includes("hard")) return "diff-hard"; // "Medium-Hard"
+  if (d.startsWith("medium")) return "diff-medium";
+  return "";
+}
+
+function renderStats() {
+  const procedures = entries.filter((e) => e.type === "procedure").length;
+  const references = entries.length - procedures;
+  const categories = new Set(entries.map((e) => e.category)).size;
+  document.getElementById("corpus-stats").innerHTML =
+    `<strong>${procedures}</strong> procedures · <strong>${references}</strong> reference guides · ` +
+    `<strong>${categories}</strong> categories`;
+}
+
+function renderFilters() {
+  const categories = ["All", ...[...new Set(entries.map((e) => e.category))].sort()];
+  const row = document.getElementById("filter-row");
+  row.innerHTML = categories
+    .map(
+      (c) =>
+        `<button class="filter-chip${c === activeCategory ? " is-active" : ""}" data-cat="${escapeAttr(c)}">
+           ${c === "All" ? "" : iconFor(c)}${escapeHtml(c)}
+         </button>`
+    )
+    .join("");
+
+  row.querySelectorAll(".filter-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      activeCategory = chip.dataset.cat;
+      renderFilters();
+      renderCategoryGrid();
+    });
+  });
+}
+
 function renderCategoryGrid() {
   const grid = document.getElementById("category-grid");
-  grid.innerHTML = entries
-    .map(
-      (e) => `
+  const visible =
+    activeCategory === "All" ? entries : entries.filter((e) => e.category === activeCategory);
+
+  grid.innerHTML = visible
+    .map((e) => {
+      const diffCls = difficultyClass(e.difficulty);
+      const badge = e.difficulty
+        ? `<span class="diff-badge ${diffCls}">${escapeHtml(e.difficulty)}</span>`
+        : `<span class="diff-badge diff-ref">reference</span>`;
+      return `
       <a class="grid-card" href="procedures/${escapeAttr(e.slug)}.html">
         <div class="card-icon-row">${iconFor(e.category)}<h4 style="margin:0">${escapeHtml(e.procedure_name)}</h4></div>
-        <p>${escapeHtml(e.category)}</p>
-      </a>`
-    )
+        <div class="grid-card-meta">
+          <span>${escapeHtml(e.category)}</span>
+          ${badge}
+        </div>
+      </a>`;
+    })
     .join("");
 }
 

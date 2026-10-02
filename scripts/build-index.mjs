@@ -197,9 +197,31 @@ function renderProcedurePage(entry) {
   return pageShell({ title: entry.procedure_name, description: entry.summary, bodyHtml: body });
 }
 
+// Reference docs are prose with "## Section" headings and "- " bullet lists.
+// Renders those three block types and nothing else, deliberately: this is our
+// own authored content, not a general-purpose markdown corpus.
+function renderReferenceBody(body, pathPrefix = "") {
+  const blocks = body.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  return blocks
+    .map((block) => {
+      const heading = block.match(/^(#{2,3})\s+(.+)$/);
+      if (heading && !block.includes("\n")) {
+        const tag = heading[1].length === 2 ? "h2" : "h3";
+        return `<${tag} class="ref-heading">${escapeHtml(heading[2].trim())}</${tag}>`;
+      }
+      const lines = block.split("\n").map((l) => l.trim());
+      if (lines.every((l) => l.startsWith("- "))) {
+        return `<ul class="ref-list">${lines
+          .map((l) => `<li>${renderMarkdownLine(l.slice(2), pathPrefix)}</li>`)
+          .join("")}</ul>`;
+      }
+      return `<p>${renderMarkdownLine(block, pathPrefix)}</p>`;
+    })
+    .join("");
+}
+
 function renderReferencePage(entry) {
   const icon = iconFor(entry.category);
-  const paragraphs = entry.body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   const body = `
     <section class="procedure-banner">
       ${icon.svg}
@@ -210,7 +232,7 @@ function renderReferencePage(entry) {
     </section>
     <section style="padding: 24px 20px; max-width: 880px; margin: 0 auto;">
       <div class="result-card">
-        ${paragraphs.map((p) => `<p>${renderMarkdownLine(p, "../")}</p>`).join("")}
+        ${renderReferenceBody(entry.body, "../")}
         <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
       </div>
     </section>
