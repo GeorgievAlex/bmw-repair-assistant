@@ -12,7 +12,7 @@ My friend repairs his own BMW E90 325i. Not professionally, not as a hobby exact
 
 Watching him work, the actual bottleneck is never the wrench. It's that the information is scattered. A torque spec lives in a forum post from 2013. A part number lives in a different tab. Half the "guides" are a video where someone talks for four minutes before touching the car. He's lying under a car on jack stands with dirty hands trying to pinch-zoom a phone screen.
 
-So I built him **[BMW Repair Workshop](https://georgievalex.github.io/bmw-repair-assistant/)**: a fast, mobile-first reference for his exact car. Seventeen repair procedures, seven reference guides, every torque value and part number laid out in a table instead of buried in prose. And an Ask box where he can describe a problem in his own words and get an answer built only from those procedures.
+So I built him **[BMW Repair Workshop](https://georgievalex.github.io/bmw-repair-assistant/)**: a fast, mobile-first reference for his exact car. Nineteen repair procedures, seven reference guides, every torque value and part number laid out in a table instead of buried in prose. And an Ask box where he can describe a problem in his own words and get an answer built only from those procedures.
 
 The interesting part isn't the site. It's what I wasn't allowed to build.
 
@@ -68,7 +68,7 @@ The site is 100% static. Content lives as Markdown in the repo, a dependency-fre
 
 I started to build one, then measured the corpus. The entire knowledge base is about 11,000 tokens. That fits in a single prompt with room to spare.
 
-So every question sends *all twenty-four entries* to the model. No embeddings, no vector store, no chunking, no retrieval step that can silently fetch the wrong chunk and answer confidently from it. The model sees the complete corpus every time.
+So every question sends *all twenty-six entries* to the model. No embeddings, no vector store, no chunking, no retrieval step that can silently fetch the wrong chunk and answer confidently from it. The model sees the complete corpus every time.
 
 This is faster to build, free of an entire category of bug, *and* more accurate than chunked retrieval at this scale. Costs about $0.002 per question. The reflex to reach for a vector database is strong, and measuring first saved me from it.
 
@@ -118,15 +118,39 @@ And the big one: **every technical figure on that site needs a mechanic's eye.**
 
 ## Handing it over
 
-<!-- TODO: replace this section before publishing.
+I sent it to him while he was at the garage, with four questions. The most important was the first: *is anything on here actually wrong?*
 
-He's checking it at the garage. Paste his actual reaction here, especially:
-  - anything he says is factually wrong
-  - whether the Ask answer to his real question was useful or nonsense
-  - whether it's usable on a phone with dirty hands
-  - what job he'd look up that isn't there
+He went through the jobs he's done himself and nothing contradicted what he knows. I want to be precise about what that is and isn't: it's a working mechanic reading it and nothing jumping out, which is genuine signal. It is not a line-by-line audit against documentation. Those caveats on every number stay exactly where they are.
 
-Do not publish with this placeholder still in it. -->
+On the AI, he was more measured than I expected, in a way I liked:
+
+> "The answers it gives are valid, you still need to check them of course, like diagnosis and etc"
+
+He arrived at the project's own position without being told it. That's about the best outcome available for a tool like this: it was useful, and it didn't make him credulous.
+
+Then he corrected an assumption I'd built the whole input design around. I'd been thinking about voice input, on the theory that dirty hands and phone screens don't mix. He doesn't want it:
+
+> "I always prefer text as long answers can be quickly forgotten and I work with gloves so taking them off to ask is not a problem"
+
+Two things I hadn't considered. Gloves come off anyway. And more interesting: a spoken answer *evaporates*, while text stays on screen while you're under the car with your hands busy. The persistence is the feature. I'd have built the wrong thing.
+
+On the look, which I'd worried was too plain:
+
+> "I like the idea it looks simple and old style - no weird images, adds and stuff"
+
+And the one real feature request, which he raised and then talked himself out of:
+
+> "Perhaps it misses like video tutorial itself but this is not possible I guess, like to search in youtube if someone performed this repair on my car/engine"
+
+It is possible, just not the way he assumed. I can't host or embed video. But I can hand off a search already narrowed to his exact chassis and engine, so he gets `BMW E90 N52B25 brake pads and rotors change` rather than generic results for a different car. Every procedure now has a "See it done" link doing that. It shipped before I finished writing this post.
+
+He also asked for exhaust and gearbox procedures. Exhaust is a straightforward driveway job and it's added. The gearbox I partly declined: the card covers fluid and pan service, and then says plainly that internal rebuild is a specialist bench job with no honest driveway version. Writing a rebuild procedure from general knowledge, for a job where a wrong clearance is a destroyed transmission, is exactly the failure mode this whole project was built to avoid. Saying "this isn't something I should write" is part of the same discipline as the model refusing the same question.
+
+The line I didn't expect:
+
+> "You're my go to AI guy and also good mechanic yourself so I would love if you can work on this in the future so me, you and other petrol heads can use it"
+
+I'm not a good mechanic. I just wrote down what I could verify and was careful about what I couldn't. But "so me, you and other petrol heads can use it" is a better description of why this is worth continuing than anything in my own notes.
 
 ## Prize Categories
 
