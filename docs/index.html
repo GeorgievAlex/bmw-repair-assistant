@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+  <title>E9X Garage — BMW E90 325i repair lookup</title>
+  <meta name="description" content="A repair reference for the BMW E90 325i (N52B25), built from one mechanic's own notes." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-brand">
+      <span class="brand-mark">◉</span>
+      <span>E9X Garage</span>
+    </div>
+    <div class="nav-sub">E90 325i · N52B25</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="label">// repair lookup</p>
+      <h1>Find the <span class="accent">right spec</span>,<br />not another forum thread.</h1>
+      <p class="hero-sub">
+        Torque values, part numbers, and step-by-step notes for the BMW E90 325i,
+        written from one mechanic's actual experience working on this chassis.
+      </p>
+
+      <div class="terminal-card" aria-hidden="true">
+        <div class="terminal-chrome">
+          <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+          <span class="terminal-title">search --query</span>
+        </div>
+        <div class="terminal-body">
+          <p><span class="prompt">$</span> ask "front brake pad torque"</p>
+          <p class="terminal-out">→ Front brake pad replacement</p>
+          <p class="terminal-out">  torque: caliper guide bolts 30 Nm, wheel bolts 120 Nm</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <p class="label">// ask something</p>
+      <div class="search-box">
+        <input
+          id="query"
+          type="text"
+          inputmode="search"
+          placeholder="e.g. serpentine belt, brake pads, radiator..."
+          autocomplete="off"
+        />
+        <button id="ask-btn">Search</button>
+      </div>
+      <div id="results"></div>
+    </section>
+
+    <section class="browse-section">
+      <p class="label">// browse by category</p>
+      <h2>All procedures</h2>
+      <div id="category-grid" class="card-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Built for Hacktoberfest's "Build for a Friend" weekend challenge. Data comes from one
+      E9X owner's own repair notes, not scraped from any manual.
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
