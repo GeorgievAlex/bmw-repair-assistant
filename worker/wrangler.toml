@@ -16,9 +16,11 @@ namespace_id = "1001"
 [vars]
 CORPUS_URL = "https://georgievalex.github.io/bmw-repair-assistant/data/index.json"
 ALLOWED_ORIGIN = "https://georgievalex.github.io"
-# Verify this against your own model catalog, or GET https://inference.do-ai.run/v1/models
-# with your key, model ids change as DigitalOcean's catalog moves.
-MODEL = "gemma-4"
+# Confirmed against GET https://inference.do-ai.run/v1/models on 2026-10-02.
+# Gemma is open-weight, which is what keeps this project's "open-source AI"
+# claim honest. Re-check this id if the catalog moves, a wrong id fails as a
+# 404 from the inference API, not as an obvious config error.
+MODEL = "gemma-4-31B-it"
 
 # DO_INFERENCE_KEY is a secret, never put it here.
 # Set it with:  npx wrangler secret put DO_INFERENCE_KEY
