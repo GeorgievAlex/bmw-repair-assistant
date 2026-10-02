@@ -28,20 +28,49 @@ function search(query) {
     .map((r) => r.entry);
 }
 
-function renderSteps(stepsText) {
-  if (!stepsText || stepsText === "N/A, reference info only.") return "";
-  const steps = stepsText
+function renderNumberedList(text) {
+  const steps = text
     .split(/\d+\.\s/)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (steps.length < 2) return `<p>${escapeHtml(stepsText)}</p>`;
+  if (steps.length < 2) return `<p>${escapeHtml(text)}</p>`;
   return `<ol>${steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>`;
+}
+
+function renderSteps(stepsText) {
+  if (!stepsText) return "";
+  // Some procedures split steps into labeled sub-groups with "### Label" headers
+  // (e.g. two unrelated filters done in one job). Render each group separately.
+  if (stepsText.includes("### ")) {
+    const parts = stepsText.split(/^###\s+(.+)$/m);
+    let html = "";
+    for (let i = 1; i < parts.length; i += 2) {
+      html += `<p class="section-title">${escapeHtml(parts[i].trim())}</p>${renderNumberedList(parts[i + 1] || "")}`;
+    }
+    return html;
+  }
+  return renderNumberedList(stepsText);
 }
 
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+// Minimal, safe markdown line renderer: handles our own authored content only
+// (images and italic emphasis). Everything is escaped first, so this never
+// introduces raw HTML, it only re-enables a couple of specific safe patterns.
+function renderMarkdownLine(line) {
+  const escaped = escapeHtml(line);
+  const withImages = escaped.replace(
+    /!\[([^\]]*)\]\(([^)\s]+)\)/g,
+    (_, alt, src) => {
+      const safeSrc = /^(https?:|\.\.?\/|[\w-]+\/)/.test(src) ? src : "#";
+      return `<img src="${safeSrc}" alt="${alt}" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" />`;
+    }
+  );
+  return withImages.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 }
 
 function renderReferenceCard(entry) {
@@ -53,7 +82,7 @@ function renderReferenceCard(entry) {
     <div class="result-card">
       <h3>${escapeHtml(entry.procedure_name)}</h3>
       <div class="result-meta">${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)} · ${escapeHtml(entry.category)}</div>
-      ${paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}
+      ${paragraphs.map((p) => `<p>${renderMarkdownLine(p)}</p>`).join("")}
       <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
     </div>
   `;
@@ -62,14 +91,17 @@ function renderReferenceCard(entry) {
 function renderResultCard(entry) {
   if (entry.type === "reference") return renderReferenceCard(entry);
   const chips = [];
-  if (entry.torque_specs && entry.torque_specs !== "N/A") {
+  if (entry.torque_specs) {
     chips.push(`<span class="spec-chip">torque: ${escapeHtml(entry.torque_specs)}</span>`);
   }
-  if (entry.part_numbers && entry.part_numbers !== "N/A") {
+  if (entry.part_numbers) {
     chips.push(`<span class="spec-chip">parts: ${escapeHtml(entry.part_numbers)}</span>`);
   }
-  if (entry.time_estimate && entry.time_estimate !== "N/A") {
+  if (entry.time_estimate) {
     chips.push(`<span class="spec-chip">time: ${escapeHtml(entry.time_estimate)}</span>`);
+  }
+  if (entry.difficulty) {
+    chips.push(`<span class="spec-chip">difficulty: ${escapeHtml(entry.difficulty)}</span>`);
   }
 
   return `
@@ -78,8 +110,8 @@ function renderResultCard(entry) {
       <div class="result-meta">${escapeHtml(entry.chassis)} · ${escapeHtml(entry.engine_code)} · ${escapeHtml(entry.category)}</div>
       <p>${escapeHtml(entry.summary)}</p>
       ${chips.length ? `<div class="spec-row">${chips.join("")}</div>` : ""}
-      ${entry.steps && entry.steps !== "N/A, reference info only." ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
-      ${entry.tools_needed && entry.tools_needed !== "N/A" ? `<p class="section-title">Tools</p><p>${escapeHtml(entry.tools_needed)}</p>` : ""}
+      ${entry.steps ? `<p class="section-title">Steps</p>${renderSteps(entry.steps)}` : ""}
+      ${entry.tools_needed ? `<p class="section-title">Tools</p><p>${escapeHtml(entry.tools_needed)}</p>` : ""}
       ${entry.notes_warnings ? `<p class="section-title">Notes</p><p class="warning">${escapeHtml(entry.notes_warnings)}</p>` : ""}
       <p class="result-meta" style="margin-top:12px">source: ${escapeHtml(entry.source || "unknown")}</p>
     </div>
