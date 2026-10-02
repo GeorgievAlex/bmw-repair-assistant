@@ -231,7 +231,17 @@ function renderAnswer(text) {
   aiAnswer.innerHTML = `
     <div class="result-card">
       <div class="card-icon-row">${iconFor("General")}<h3 style="margin:0">Answer</h3></div>
-      ${paragraphs.map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`).join("")}
+      ${paragraphs
+        .map(
+          (p) =>
+            // Escape first, then re-enable just **bold**, which is the only
+            // markdown the model reliably emits. Escaping before this means
+            // the model can't inject markup, only ask for bold text.
+            `<p>${escapeHtml(p)
+              .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+              .replace(/\n/g, "<br>")}</p>`
+        )
+        .join("")}
       <p class="result-meta" style="margin-top:12px">
         Generated from this site's procedures only, by an open-weight model. Check the linked
         procedure before turning a wrench, and verify any torque figure or part number yourself.
