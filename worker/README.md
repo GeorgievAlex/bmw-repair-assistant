@@ -43,10 +43,41 @@ curl -s https://inference.do-ai.run/v1/models \
 
 ## Cost and limits
 
-The whole corpus (~11k tokens) goes into every request, so each question costs
-roughly $0.002 at Gemma's rate. Cloudflare's free tier covers 100k worker
-requests/day, far more than this will ever use.
+Each question sends the whole corpus (~11k tokens), so it costs roughly $0.002
+at Gemma's rate. Cloudflare's free tier covers 100k worker requests/day, so
+Cloudflare itself is not where a bill would come from. The inference is.
 
-The worker caps questions at 500 characters and only accepts requests from the
-origin set in `ALLOWED_ORIGIN`, so a random site can't point at it and burn
-through your inference balance.
+### The actual spend ceiling (do this)
+
+DigitalOcean Serverless Inference runs on a **prepaid balance**. When it hits
+zero, DigitalOcean suspends inference access rather than continuing to bill.
+That makes it a genuine hard ceiling, but only if you set it up deliberately:
+
+1. Fund the **Inference & Agents balance**, not the account prepayment balance.
+   The Inference & Agents balance is ring-fenced, only inference and managed
+   agents draw from it, so a runaway here can never consume funds intended for
+   droplets or databases.
+2. **Turn auto-reload off.** It is ON by default on the add-funds page. Left on,
+   the balance refills itself and stops being a ceiling at all.
+3. Keep the amount small. At $5, the worst realistic case is losing $5 and the
+   Ask box going quiet until you choose to top it up.
+
+### What the worker does and does not protect
+
+| Control | What it actually stops |
+|---|---|
+| `ALLOWED_ORIGIN` CORS header | Another *website* calling this worker from browser JavaScript. It does **not** stop `curl` or any script. CORS is enforced by browsers, not by servers. |
+| 500 character question cap | Oversized prompts inflating per-request cost. |
+| `max_tokens: 700` | Runaway generation length. |
+| Per-IP rate limit (8/min) | One actor draining the balance quickly. Buys you time to notice, doesn't cap the total. |
+
+None of those is a spend ceiling. The prepaid balance is the spend ceiling.
+Treat the worker-side limits as what they are: friction that makes abuse slow
+and visible rather than instant.
+
+### If you want to go further
+
+Worth considering only if this ever gets real traffic: Cloudflare Turnstile in
+front of the endpoint, a shared-secret header the site sends, or moving the
+daily cap into a KV counter so there's a true per-day request ceiling rather
+than a per-IP-per-minute one.

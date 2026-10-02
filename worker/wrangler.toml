@@ -2,6 +2,17 @@ name = "bmw-repair-assistant-ask"
 main = "src/worker.js"
 compatibility_date = "2026-10-02"
 
+# Per-IP rate limit. This is damage control, not the real spend ceiling, see
+# the README: the hard ceiling is the DigitalOcean prepaid balance with
+# auto-reload turned OFF.
+[[ratelimits]]
+name = "ASK_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 8
+  period = 60
+
 [vars]
 CORPUS_URL = "https://georgievalex.github.io/bmw-repair-assistant/data/index.json"
 ALLOWED_ORIGIN = "https://georgievalex.github.io"

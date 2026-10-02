@@ -90,6 +90,18 @@ export default {
       return json({ error: "worker is missing its DO_INFERENCE_KEY secret" }, 500, env);
     }
 
+    // Per-IP rate limit. Note this is damage control, not a spend ceiling:
+    // CORS only constrains browsers, so anything with curl can reach this
+    // endpoint directly. The actual hard ceiling is the DigitalOcean prepaid
+    // balance with auto-reload disabled.
+    if (env.ASK_LIMITER) {
+      const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+      const { success } = await env.ASK_LIMITER.limit({ key: ip });
+      if (!success) {
+        return json({ error: "Too many questions in a short time, give it a minute." }, 429, env);
+      }
+    }
+
     let question;
     try {
       ({ question } = await request.json());
